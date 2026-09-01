@@ -1,0 +1,11 @@
+<?php
+/**
+ * Konfiguration für den USKA QSL API-Import
+ *
+ * Diese Datei als "config.php" (ohne .example) kopieren
+ * und den Token vom USKA Webmaster eintragen.
+ *
+ * WICHTIG: config.php ist in .gitignore – Token niemals ins Repo einchecken!
+ */
+
+define('QSL_TOKEN', 'hier-den-token-eintragen');

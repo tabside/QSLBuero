@@ -1,0 +1,17 @@
+<?php
+// Diese Datei als "dbConnect.php" kopieren und mit echten Werten befüllen.
+// dbConnect.php ist in .gitignore – niemals ins Repo einchecken!
+
+$host     = "localhost:3307";
+$db_name  = "qsl_db";
+$username = "root";
+$password = "dein-passwort-hier";
+
+$mysqli = new mysqli($host, $username, $password, $db_name);
+
+try {
+    $database = new PDO("mysql:host={$host};dbname={$db_name}", $username, $password);
+} catch(PDOException $exception) {
+    echo '<meta http-equiv="refresh" content="5">';
+    echo "Connection error: " . $exception->getMessage() . "<br> Bitte <button onclick=location=URL>Seite neuladen</button>";
+}

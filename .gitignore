@@ -1,0 +1,11 @@
+# Datenbankverbindung mit Passwort – niemals ins Repo!
+dbConnect.php
+
+# Datenbankdump mit Personendaten – niemals ins Repo!
+qsl_db.sql
+
+# Laufzeit-Zähler
+counter/*.txt
+
+# Temp
+test.html
