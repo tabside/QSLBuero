@@ -461,9 +461,9 @@ if($value3['via'] == "1") {
 
 				if(strExport == "")
 				{
-					const autoCutOpt = document.getElementById('autocut').checked ? 0x1 : 0x0;
+					const autoCutOpt = document.getElementById('autocut').checked ? 0x1 : 0x10000000;
 					objDoc.StartPrint("", autoCutOpt);
-					objDoc.PrintOut(1, 0x10000000);
+					objDoc.PrintOut(1, autoCutOpt);
 					objDoc.EndPrint();
 
                     $('.input-group-addon.dropdown-toggle:eq( 0 )').trigger( "click" );
@@ -527,9 +527,9 @@ if($value3['via'] == "1") {
 
 				if(strExport == "")
 				{
-					const autoCutOpt2 = document.getElementById('autocut').checked ? 0x1 : 0x0;
+					const autoCutOpt2 = document.getElementById('autocut').checked ? 0x1 : 0x10000000;
 					objDoc2.StartPrint("", autoCutOpt2);
-					objDoc2.PrintOut(1, 0x10000000);
+					objDoc2.PrintOut(1, autoCutOpt2);
 					objDoc2.EndPrint();
                     $('.input-group-addon.dropdown-toggle:eq( 1 )').trigger( "click" );
 
@@ -593,9 +593,9 @@ if($value3['via'] == "1") {
 
 				if(strExport == "")
 				{
-					const autoCutOpt3 = document.getElementById('autocut').checked ? 0x1 : 0x0;
+					const autoCutOpt3 = document.getElementById('autocut').checked ? 0x1 : 0x10000000;
 					objDoc3.StartPrint("", autoCutOpt3); // 0x1 = autocut, 0x0 = kein cut
-					objDoc3.PrintOut(1, 0x10000000);
+					objDoc3.PrintOut(1, autoCutOpt3);
 					objDoc3.EndPrint();
                     $('.input-group-addon.dropdown-toggle:eq( 2 )').trigger( "click" );
 
@@ -648,9 +648,9 @@ if($value3['via'] == "1") {
 
 				if(strExport == "")
 				{
-					const autoCutOpt4 = document.getElementById('autocut').checked ? 0x1 : 0x0;
+					const autoCutOpt4 = document.getElementById('autocut').checked ? 0x1 : 0x10000000;
 					objDoc4.StartPrint("", autoCutOpt4);
-					objDoc4.PrintOut(1, 0x10000000);
+					objDoc4.PrintOut(1, autoCutOpt4);
 					objDoc4.EndPrint();
 
 
