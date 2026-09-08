@@ -141,7 +141,7 @@ foreach ($members as $m) {
     $vBemerk = implode("\n", $bemerkParts);
 
     $stmt->bind_param(
-        'sssssssssssisssssss',
+        'sssssssssssissssss',
         $kontakte, $callsign, $vorname, $nachname,
         $strasse, $postfach, $plz, $ort, $land,
         $email, $sprache,
