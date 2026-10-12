@@ -33,7 +33,7 @@ if (empty($token)) {
 }
 
 // ---------- API abrufen ----------
-$apiUrl = 'https://new.uska.ch/wp-json/uska/v1/qsl-export';
+$apiUrl = 'https://uska.ch/wp-json/uska/v1/qsl-export';
 
 $ctx = stream_context_create([
     'http' => [
