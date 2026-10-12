@@ -14,6 +14,11 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// Die USKA-API bereitet die Daten seit Oktober 2026 in Echtzeit auf und
+// braucht dafür ca. 80 Sekunden. Unter Windows (WAMP) zählt die Wartezeit
+// auf die API bei max_execution_time mit, darum das Limit hier hochsetzen.
+set_time_limit(300);
+
 require __DIR__ . '/../dbConnect.php';
 
 // ---------- Token laden ----------
@@ -34,7 +39,7 @@ $ctx = stream_context_create([
     'http' => [
         'method'  => 'GET',
         'header'  => "X-QSL-Token: {$token}\r\nAccept: application/json\r\n",
-        'timeout' => 30,
+        'timeout' => 240, // API-Antwort dauert ca. 80 Sekunden (Echtzeit-Aufbereitung)
     ],
     'ssl' => [
         'verify_peer'      => true,
