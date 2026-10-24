@@ -1,5 +1,6 @@
 <?php
 include 'dbConnect.php';
+include 'functions.php';
 
 
         //$sql = "SELECT * FROM `qsl` WHERE `callsign` LIKE 'HB9%' AND (`Mitgliedschaft` = 'Aktiv' OR `Mitgliedschaft` = 'Ehren' OR `Mitgliedschaft` = 'Kollektiv' OR `Mitgliedschaft` = 'Jung' OR `Mitgliedschaft` = 'Sektion') ORDER BY `callsign` ASC";
@@ -52,9 +53,9 @@ include 'dbConnect.php';
     <link rel="stylesheet" href="http://localhost/css/style.css" />
     <link rel="stylesheet" type="text/css" href="http://localhost/css/bootstrap-combobox.css"/>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" integrity="sha384-6ePHh72Rl3hKio4HiJ841psfsRJveeS+aLoaEf3BWfS+gTF0XdAqku2ka8VddikM" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js" integrity="sha384-v7eExOYhwaHa3+GhP+lHytJsMcidazNdjiaggRhdbvVTVTCjweLpa23t37ZKxaCf" crossorigin="anonymous"></script>
 
 
     <script src="http://localhost/js/bootstrap-add-clear.min.js"></script>
@@ -178,11 +179,11 @@ include 'dbConnect.php';
   									 " "
   									);
           }
-					$addrPacket = json_encode($addrArr, JSON_UNESCAPED_UNICODE);
+					$addrPacket = json_attr($addrArr);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket; ?>'><?php echo substr($value['callsign'],3); ?></option>
+            <option value='<?php echo $addrPacket; ?>'><?php echo e(substr($value['callsign'],3)); ?></option>
 			<?php
 			}
 			  ?>
@@ -247,11 +248,11 @@ include 'dbConnect.php';
   									);
           }
 
-					$addrPacket2 = json_encode($addrArr2, JSON_UNESCAPED_UNICODE);
+					$addrPacket2 = json_attr($addrArr2);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket2; ?>'><?php echo substr($value2['callsign'],3); ?></option>
+            <option value='<?php echo $addrPacket2; ?>'><?php echo e(substr($value2['callsign'],3)); ?></option>
 			<?php
 			}
 			  ?>
@@ -317,11 +318,11 @@ if($value3['via'] == "1") {
   									);
           }
 
-					$addrPacket3 = json_encode($addrArr3, JSON_UNESCAPED_UNICODE);
+					$addrPacket3 = json_attr($addrArr3);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket3; ?>'><?php echo $value3['callsign']; ?></option>
+            <option value='<?php echo $addrPacket3; ?>'><?php echo e($value3['callsign']); ?></option>
 			<?php
 			}
 			  ?>
@@ -743,7 +744,11 @@ async function doDbUpdate() {
     document.getElementById('updateResult').innerHTML = '<i class="fa fa-spinner fa-spin"></i> Update läuft, bitte warten...';
     $('#updateModal').modal('show');
     try {
-        const r = await fetch('update/api_update.php');
+        // Der Endpunkt verlangt POST und den UPDATE_TOKEN aus dbConnect.php (kein Auslösen per blossem Link)
+        const r = await fetch('update/api_update.php', {
+            method: 'POST',
+            headers: {'X-Update-Token': <?php echo json_encode(defined('UPDATE_TOKEN') ? UPDATE_TOKEN : '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>}
+        });
         const text = await r.text();
         const ok = r.ok && text.indexOf('erfolgreich') !== -1;
         document.getElementById('updateResult').innerHTML =

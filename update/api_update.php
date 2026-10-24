@@ -9,10 +9,21 @@
  *   define('QSL_TOKEN', 'dein-token-hier');
  *
  * Alternativ als Umgebungsvariable: QSL_TOKEN=... php api_update.php
+ *
+ * Aufruf nur über die Kommandozeile (php update/api_update.php) oder per
+ * HTTP POST mit dem Header X-Update-Token, der dem UPDATE_TOKEN aus
+ * dbConnect.php entsprechen muss (der "DB Update"-Button in index.php
+ * schickt ihn mit). Ohne UPDATE_TOKEN ist der Web-Aufruf gesperrt.
  */
 
-ini_set('display_errors', 1);
+ini_set('display_errors', '0');
 error_reporting(E_ALL);
+
+$isCli = (php_sapi_name() === 'cli');
+if (!$isCli) {
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Cache-Control: no-store');
+}
 
 // Die USKA-API bereitet die Daten seit Oktober 2026 in Echtzeit auf und
 // braucht dafür ca. 80 Sekunden. Unter Windows (WAMP) zählt die Wartezeit
@@ -20,6 +31,25 @@ error_reporting(E_ALL);
 set_time_limit(300);
 
 require __DIR__ . '/../dbConnect.php';
+
+// ---------- Zugriffsschutz ----------
+if (!$isCli) {
+    $expected = defined('UPDATE_TOKEN') ? (string)UPDATE_TOKEN : '';
+    $presented = (string)($_SERVER['HTTP_X_UPDATE_TOKEN'] ?? '');
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        header('Allow: POST');
+        die('Fehler: DB Update nur per POST (Button "DB Update") oder über die Kommandozeile.');
+    }
+    if ($expected === '' || strlen($expected) < 16) {
+        http_response_code(403);
+        die('Fehler: UPDATE_TOKEN in dbConnect.php nicht gesetzt (mindestens 16 Zeichen). Update nur über die Kommandozeile möglich.');
+    }
+    if ($presented === '' || !hash_equals($expected, $presented)) {
+        http_response_code(403);
+        die('Fehler: Zugriff verweigert (UPDATE_TOKEN falsch).');
+    }
+}
 
 // ---------- Token laden ----------
 $configFile = __DIR__ . '/config.php';
@@ -74,9 +104,26 @@ $members    = $data['members'];
 $apiCount   = $data['count'] ?? count($members);
 $generatedAt = $data['generated_at'] ?? '?';
 
+if (count($members) === 0) {
+    die('Fehler: API hat keine Mitglieder geliefert – bestehende Daten bleiben unverändert.');
+}
+
 // ---------- Datenbankupdate ----------
+// Alles in einer Transaktion: der alte Bestand wird erst ersetzt, wenn jeder
+// Datensatz importiert ist. TRUNCATE würde in MySQL sofort committen, darum DELETE.
 $mysqli->set_charset('utf8mb4');
-$mysqli->query("TRUNCATE TABLE qsl");
+try {
+    if (!$mysqli->begin_transaction()) {
+        die('Fehler: Transaktion konnte nicht gestartet werden.');
+    }
+    if (!$mysqli->query("DELETE FROM qsl")) {
+        $mysqli->rollback();
+        die('Fehler beim Leeren der Tabelle: ' . $mysqli->error);
+    }
+} catch (mysqli_sql_exception $e) { // PHP >= 8.1 wirft statt false zu liefern
+    $mysqli->rollback();
+    die('Fehler beim Leeren der Tabelle: ' . $e->getMessage());
+}
 
 $sql = "
     INSERT INTO qsl (
@@ -91,8 +138,13 @@ $sql = "
 //              PLZ, Ort, Land, Email, Sprache, noqsl,
 //              vName, vStrasse, vPostfach, vOrt, vLand, vBemerk = 18
 
-$stmt = $mysqli->prepare($sql);
+try {
+    $stmt = $mysqli->prepare($sql);
+} catch (mysqli_sql_exception $e) {
+    $stmt = false;
+}
 if (!$stmt) {
+    $mysqli->rollback();
     die('Fehler beim Vorbereiten des Statements: ' . $mysqli->error);
 }
 
@@ -154,7 +206,12 @@ foreach ($members as $m) {
         $vName, $vStrasse, $vPostfach, $vOrt, $vLand, $vBemerk
     );
 
-    if ($stmt->execute()) {
+    try {
+        $ok = $stmt->execute();
+    } catch (mysqli_sql_exception $e) { // PHP >= 8.1 wirft statt false zu liefern
+        $ok = false;
+    }
+    if ($ok) {
         $inserted++;
     } else {
         $errors[] = "Callsign {$callsign}: " . $stmt->error;
@@ -164,14 +221,25 @@ foreach ($members as $m) {
 $stmt->close();
 
 // ---------- Ergebnis ----------
+if (!empty($errors)) {
+    // Nichts übernehmen: der bisherige Bestand bleibt vollständig erhalten
+    $mysqli->rollback();
+    echo "DB Update abgebrochen – alter Bestand unverändert.\n";
+    echo "API-Stand: {$generatedAt}\n";
+    echo "Mitglieder von API: {$apiCount}\n";
+    echo "Fehler bei " . count($errors) . " Einträgen:\n";
+    foreach ($errors as $e) {
+        echo "  - {$e}\n";
+    }
+    exit(1);
+}
+
+if (!$mysqli->commit()) {
+    $mysqli->rollback();
+    die('Fehler: Commit fehlgeschlagen – alter Bestand unverändert.');
+}
+
 echo "DB Update erfolgreich!\n";
 echo "API-Stand: {$generatedAt}\n";
 echo "Mitglieder von API: {$apiCount}\n";
 echo "Importiert: {$inserted}\n";
-
-if (!empty($errors)) {
-    echo "\nFehler bei " . count($errors) . " Einträgen:\n";
-    foreach ($errors as $e) {
-        echo "  - {$e}\n";
-    }
-}

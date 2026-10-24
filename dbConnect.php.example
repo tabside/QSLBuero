@@ -4,14 +4,25 @@
 
 $host     = "localhost:3307";
 $db_name  = "qsl_db";
-$username = "root";
+// Eigener DB-Benutzer nur für diese App, kein root. Benötigte Rechte auf qsl_db:
+//   CREATE USER 'qsl_app'@'localhost' IDENTIFIED BY '...';
+//   GRANT SELECT, INSERT, DELETE ON qsl_db.* TO 'qsl_app'@'localhost';
+$username = "qsl_app";
 $password = "dein-passwort-hier";
 
-$mysqli = new mysqli($host, $username, $password, $db_name);
+// Geheimnis für den "DB Update"-Button bzw. update/api_update.php per HTTP (mindestens 16 Zeichen,
+// z.B. aus `openssl rand -hex 24`). Ohne diesen Wert geht das Update nur über die Kommandozeile.
+define('UPDATE_TOKEN', 'hier-ein-langes-zufaelliges-geheimnis');
 
 try {
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    $mysqli = new mysqli($host, $username, $password, $db_name);
     $database = new PDO("mysql:host={$host};dbname={$db_name}", $username, $password);
-} catch(PDOException $exception) {
+} catch (Throwable $exception) {
+    // Details nur ins PHP-Fehlerlog, nie in den Browser (Host, Port, Benutzer stehen im Fehlertext)
+    error_log('QSL App: Datenbankverbindung fehlgeschlagen: ' . $exception->getMessage());
+    http_response_code(503);
     echo '<meta http-equiv="refresh" content="5">';
-    echo "Connection error: " . $exception->getMessage() . "<br> Bitte <button onclick=location=URL>Seite neuladen</button>";
+    echo "Datenbankverbindung fehlgeschlagen. Bitte <button onclick=location.reload()>Seite neu laden</button>";
+    exit;
 }

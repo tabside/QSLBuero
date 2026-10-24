@@ -1,32 +1,30 @@
 <?php
-error_reporting(0);
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 include 'dbConnect.php';
-$call = $_GET["call"];
+include 'functions.php';
 
-	$sql = "SELECT * FROM `qsl` WHERE `callsign` = '".$call."'";
+$call = sanitize_callsign($_GET["call"] ?? '');
+if ($call === null) {
+    http_response_code(400);
+    exit('Ungültiges Rufzeichen.');
+}
 
-        //$sql = "SELECT * FROM `qsl` WHERE `callsign` = '".$call."'";
+        $sql = "SELECT * FROM `qsl` WHERE `callsign` = :call";
         $query = $database->prepare($sql);
-        $query->execute();
+        $query->execute([':call' => $call]);
 
 		$result = $query->fetch();
-		/* echo "<pre>";
-		print_r($result);
-		echo "</pre>"; */
+        if ($result === false) {
+            http_response_code(404);
+            exit('Rufzeichen nicht gefunden.');
+        }
 
-
-        $sql3 = "SELECT * FROM `counter` WHERE `callname` = '".$call."'";
+        $sql3 = "SELECT * FROM `counter` WHERE `callname` = :call";
         $query3 = $database->prepare($sql3);
-        $query3->execute();
+        $query3->execute([':call' => $call]);
 
 		$result3 = $query3->fetch();
-		/* echo "<pre>";
-		print_r($result3);
-		echo "</pre>"; */
-
-
-
-?>
 
 ?>
 
@@ -50,9 +48,9 @@ $call = $_GET["call"];
     <link rel="stylesheet" href="http://localhost/css/style.css" />
     <link rel="stylesheet" type="text/css" href="http://localhost/css/bootstrap-combobox.css"/>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" integrity="sha384-6ePHh72Rl3hKio4HiJ841psfsRJveeS+aLoaEf3BWfS+gTF0XdAqku2ka8VddikM" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js" integrity="sha384-v7eExOYhwaHa3+GhP+lHytJsMcidazNdjiaggRhdbvVTVTCjweLpa23t37ZKxaCf" crossorigin="anonymous"></script>
 
 
     <script src="http://localhost/js/bootstrap-add-clear.min.js"></script>
@@ -101,36 +99,36 @@ $call = $_GET["call"];
         <!-- echo out the system feedback (error and success messages) -->
         	<div class="row">
         	<div class="col-sm-4">
-		        <h2>Detail <?php echo $result['callsign']; ?></h2>
+		        <h2>Detail <?php echo e($result['callsign']); ?></h2>
 		</div>
 		<div class="col-sm-4" style="margin-top: 25px; display:none;">
-			<span>(<?php echo file_get_contents("counter/".$call.".txt");; ?> Etiketten gedruckt)</span>
+			<span>(<?php echo e(read_counter($call)); ?> Etiketten gedruckt)</span>
 		</div>
 		</div>
 		<div class="row">
         	<div class="col-sm-4">
 				<h3>Adresse</h3>
-				<?php if($result['Name'] == "" AND $result['Vorname'] == ""){echo utf8_encode($result['Kontakte']);}else{echo utf8_encode($result['Vorname']." ".$result['Nachname']);} ?><br>
-				<?php if($result['Strasse'] != ""){echo utf8_encode($result['Strasse'])."<br>";} ?>
-				<?php if($result['Postfach'] != ""){echo $result['Postfach']."<br>";} ?>
-				<?php echo utf8_encode($result['PLZ']." ".$result['Ort']); ?><br>
+				<?php if($result['Name'] == "" AND $result['Vorname'] == ""){echo e(utf8_encode($result['Kontakte']));}else{echo e(utf8_encode($result['Vorname']." ".$result['Nachname']));} ?><br>
+				<?php if($result['Strasse'] != ""){echo e(utf8_encode($result['Strasse']))."<br>";} ?>
+				<?php if($result['Postfach'] != ""){echo e($result['Postfach'])."<br>";} ?>
+				<?php echo e(utf8_encode($result['PLZ']." ".$result['Ort'])); ?><br>
         	</div>
 			<div class="col-sm-4">
 				<h3>Kontakt</h3>
-				<?php if(!empty($result['Handy'])){echo "Natel: ".$result['Handy']."<br>";}; ?>
-				<?php if(!empty($result['ADR_TEG'])){echo "Tel G: ".$result['ADR_TEG']."<br>";}; ?>
-				<?php if(!empty($result['ADR_TEP'])){echo "Tel P: ".$result['ADR_TEP']."<br>";}; ?>
+				<?php if(!empty($result['Handy'])){echo "Natel: ".e($result['Handy'])."<br>";}; ?>
+				<?php if(!empty($result['ADR_TEG'])){echo "Tel G: ".e($result['ADR_TEG'])."<br>";}; ?>
+				<?php if(!empty($result['ADR_TEP'])){echo "Tel P: ".e($result['ADR_TEP'])."<br>";}; ?>
 				<?php $emails = str_replace(";",",",$result['Email']); ?>
-				<?php echo implode("<br>",explode(",",$emails)); ?><br>
+				<?php echo implode("<br>",array_map('e',explode(",",$emails))); ?><br>
         	</div>
 			<div class="col-sm-4">
 				<h3>Infos</h3>
-				Mitgliedschaft: <?php echo $result['Mitgliedschaft']; ?><br>
-				<?php if(!empty($result['Geburtsdatum'])){echo "Geburtsdatum: ".date("d.m.Y", strtotime($result['Geburtsdatum']))."<br>";}; ?>
-				<?php if(!empty($result['Beruf'])){echo "Beruf: ".utf8_encode($result['Beruf'])."<br>";}; ?>
-                <?php if(!empty($result['USK_EINTR'])){echo "USKA Eintritt: ".date("d.m.Y", strtotime($result['Eintritt']))."<br>";}; ?>
-				<?php if(!empty($result['USK_AUSTR'])){echo "USKA Austritt: ".date("d.m.Y", strtotime($result['Austritt']))."<br>";}; ?>
-				<?php if(!empty($result['Austrittsgrund'])){echo "Austrittsgrund: ".$result['Austrittsgrund'];}; ?>
+				Mitgliedschaft: <?php echo e($result['Mitgliedschaft']); ?><br>
+				<?php if(!empty($result['Geburtsdatum'])){echo "Geburtsdatum: ".e(date("d.m.Y", strtotime($result['Geburtsdatum'])))."<br>";}; ?>
+				<?php if(!empty($result['Beruf'])){echo "Beruf: ".e(utf8_encode($result['Beruf']))."<br>";}; ?>
+                <?php if(!empty($result['USK_EINTR'])){echo "USKA Eintritt: ".e(date("d.m.Y", strtotime($result['Eintritt'])))."<br>";}; ?>
+				<?php if(!empty($result['USK_AUSTR'])){echo "USKA Austritt: ".e(date("d.m.Y", strtotime($result['Austritt'])))."<br>";}; ?>
+				<?php if(!empty($result['Austrittsgrund'])){echo "Austrittsgrund: ".e($result['Austrittsgrund']);}; ?>
 
 
         	</div>
@@ -139,21 +137,21 @@ $call = $_GET["call"];
 		<div class="row">
 			<div class="col-sm-4">
 				<h3>Via</h3>
-				<?php if(!empty($result['vName'])){echo utf8_encode($result['vName'])."<br>";}; ?>
-				<?php if(!empty($result['vStrasse'])){echo utf8_encode($result['vStrasse'])."<br>";}; ?>
-				<?php if(!empty($result['vPostfach'])){echo utf8_encode($result['vPostfach'])."<br>";}; ?>
-				<?php if(!empty($result['vOrt'])){echo utf8_encode($result['vOrt'])."<br>";}; ?>
-				<?php if(!empty($result['vLand'])){echo utf8_encode($result['vLand'])."<br>";}; ?>
+				<?php if(!empty($result['vName'])){echo e(utf8_encode($result['vName']))."<br>";}; ?>
+				<?php if(!empty($result['vStrasse'])){echo e(utf8_encode($result['vStrasse']))."<br>";}; ?>
+				<?php if(!empty($result['vPostfach'])){echo e(utf8_encode($result['vPostfach']))."<br>";}; ?>
+				<?php if(!empty($result['vOrt'])){echo e(utf8_encode($result['vOrt']))."<br>";}; ?>
+				<?php if(!empty($result['vLand'])){echo e(utf8_encode($result['vLand']))."<br>";}; ?>
 
-				<?php if(!empty($result['vBemerk'])){echo "<br><br>".utf8_encode($result['vBemerk'])."<br>";}; ?>
+				<?php if(!empty($result['vBemerk'])){echo "<br><br>".e(utf8_encode($result['vBemerk']))."<br>";}; ?>
 
 			</div>
 		</div>
 <?php
 
-$sql2 = "SELECT Code, Bedeutung FROM `T_CODE01` WHERE `Code` = '".$result['ADR_GRU']."'";
+$sql2 = "SELECT Code, Bedeutung FROM `T_CODE01` WHERE `Code` = :code";
         $query2 = $database->prepare($sql2);
-        $query2->execute();
+        $query2->execute([':code' => $result['ADR_GRU'] ?? '']);
 
 		$result2 = $query2->fetch();
 
