@@ -223,7 +223,7 @@ include 'functions.php';
 			<?php
 
 				foreach($result2 as $value2) {
-					if($value2['Name'] == "" AND $value2['Vorname'] == ""){$anschriftname2 = utf8_encode($value2['Kontakte']);}else{$anschriftname2 = utf8_encode($value2['Vorname']." ".$value2['Nachname']);}
+					if($value2['Nachname'] == "" AND $value2['Vorname'] == ""){$anschriftname2 = utf8_encode($value2['Kontakte']);}else{$anschriftname2 = utf8_encode($value2['Vorname']." ".$value2['Nachname']);}
 					if($value2['Strasse'] == ""){$value2['Strasse'] = $value2['Postfach'];}
 					if($value2['Strasse'] != "" AND $value2['Postfach'] != ""){$value2['Strasse'] = $value2['Strasse']." / P.O.BOX ".filter_var($value2['Postfach'], FILTER_SANITIZE_NUMBER_INT);}
 					$addrArr2 = array(" ", //ADA_KNR
@@ -293,7 +293,7 @@ include 'functions.php';
 			<?php
 
 				foreach($result3 as $value3) {
-					if($value3['Name'] == "" AND $value3['Vorname'] == ""){$anschriftname3 = utf8_encode($value3['Kontakte']);}else{$anschriftname3 = utf8_encode($value3['Vorname']." ".$value3['Nachname']);}
+					if($value3['Nachname'] == "" AND $value3['Vorname'] == ""){$anschriftname3 = utf8_encode($value3['Kontakte']);}else{$anschriftname3 = utf8_encode($value3['Vorname']." ".$value3['Nachname']);}
 					if($value3['Strasse'] == ""){$value3['Strasse'] = $value3['Postfach'];}
 					if($value3['Strasse'] != "" AND $value3['Postfach'] != ""){$value['Strasse'] = $value3['Strasse']." / P.O.BOX ".filter_var($value3['Postfach'], FILTER_SANITIZE_NUMBER_INT);}
 					$addrArr3 = array(" ", //KNR

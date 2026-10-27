@@ -108,7 +108,7 @@ if ($call === null) {
 		<div class="row">
         	<div class="col-sm-4">
 				<h3>Adresse</h3>
-				<?php if($result['Name'] == "" AND $result['Vorname'] == ""){echo e(utf8_encode($result['Kontakte']));}else{echo e(utf8_encode($result['Vorname']." ".$result['Nachname']));} ?><br>
+				<?php if($result['Nachname'] == "" AND $result['Vorname'] == ""){echo e(utf8_encode($result['Kontakte']));}else{echo e(utf8_encode($result['Vorname']." ".$result['Nachname']));} ?><br>
 				<?php if($result['Strasse'] != ""){echo e(utf8_encode($result['Strasse']))."<br>";} ?>
 				<?php if($result['Postfach'] != ""){echo e($result['Postfach'])."<br>";} ?>
 				<?php echo e(utf8_encode($result['PLZ']." ".$result['Ort'])); ?><br>
