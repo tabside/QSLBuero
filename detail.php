@@ -20,11 +20,6 @@ if ($call === null) {
             exit('Rufzeichen nicht gefunden.');
         }
 
-        $sql3 = "SELECT * FROM `counter` WHERE `callname` = :call";
-        $query3 = $database->prepare($sql3);
-        $query3->execute([':call' => $call]);
-
-		$result3 = $query3->fetch();
 
 ?>
 
