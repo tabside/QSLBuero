@@ -132,11 +132,11 @@ $sql = "
         Handy, Email, Eintritt, Austritt, Geschlecht, Geburtsdatum, Sprache,
         via, noqsl,
         vName, vStrasse, vPostfach, vOrt, vLand, vBemerk
-    ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, '', ?, '', '', '', '', ?, 0, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, '', ?, '', '', '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ";
 // Platzhalter: Kontakte, callsign, Vorname, Nachname, Strasse, Postfach,
-//              PLZ, Ort, Land, Email, Sprache, noqsl,
-//              vName, vStrasse, vPostfach, vOrt, vLand, vBemerk = 18
+//              PLZ, Ort, Land, Email, Sprache, via, noqsl,
+//              vName, vStrasse, vPostfach, vOrt, vLand, vBemerk = 19
 
 try {
     $stmt = $mysqli->prepare($sql);
@@ -170,17 +170,19 @@ foreach ($members as $m) {
 
     // Hauptadresse (corr_address)
     $addr    = $m['corr_address'] ?? [];
-    $strasse = trim(($addr['street'] ?? '') . ($addr['addition'] ? "\n" . $addr['addition'] : ''));
+    $strasse = trim(($addr['street'] ?? '') . (!empty($addr['addition']) ? "\n" . $addr['addition'] : ''));
     $postfach = $addr['po_box'] ?? '';
     $plz     = $addr['zip']     ?? '';
     $ort     = $addr['city']    ?? '';
     $land    = $addr['country'] ?? '';
 
     // QSL-Weiterleitungsadresse (qsl_address)
-    if (!empty($m['qsl_address'])) {
-        $qa       = $m['qsl_address'];
+    // via = 1: Etikett geht an die QSL-Adresse statt an die Hauptadresse (index.php)
+    $qa  = is_array($m['qsl_address'] ?? null) ? $m['qsl_address'] : [];
+    $via = (trim($qa['street'] ?? '') !== '' || trim($qa['po_box'] ?? '') !== '' || trim($qa['city'] ?? '') !== '') ? 1 : 0;
+    if ($via) {
         $vName    = trim(($qa['first_name'] ?? $vorname) . ' ' . ($qa['last_name'] ?? $nachname));
-        $vStrasse = trim(($qa['street'] ?? '') . ($qa['addition'] ? "\n" . $qa['addition'] : ''));
+        $vStrasse = trim(($qa['street'] ?? '') . (!empty($qa['addition']) ? "\n" . $qa['addition'] : ''));
         $vPostfach = $qa['po_box']   ?? '';
         $vOrt     = trim(($qa['zip'] ?? '') . ' ' . ($qa['city'] ?? ''));
         $vLand    = $qa['country']   ?? '';
@@ -198,11 +200,11 @@ foreach ($members as $m) {
     $vBemerk = implode("\n", $bemerkParts);
 
     $stmt->bind_param(
-        'sssssssssssissssss',
+        'sssssssssssiissssss',
         $kontakte, $callsign, $vorname, $nachname,
         $strasse, $postfach, $plz, $ort, $land,
         $email, $sprache,
-        $noqsl,
+        $via, $noqsl,
         $vName, $vStrasse, $vPostfach, $vOrt, $vLand, $vBemerk
     );
 
