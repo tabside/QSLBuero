@@ -34,7 +34,7 @@ include 'functions.php';
 ?>
 
 <!doctype html>
-<html>
+<html lang="de" translate="no">
 <head>
     <title>QSL App</title>
     <!-- META -->
