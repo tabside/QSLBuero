@@ -108,10 +108,10 @@ if ($call === null) {
 		<div class="row">
         	<div class="col-sm-4">
 				<h3>Adresse</h3>
-				<?php if($result['Nachname'] == "" AND $result['Vorname'] == ""){echo e(utf8_encode($result['Kontakte']));}else{echo e(utf8_encode($result['Vorname']." ".$result['Nachname']));} ?><br>
-				<?php if($result['Strasse'] != ""){echo e(utf8_encode($result['Strasse']))."<br>";} ?>
+				<?php if($result['Nachname'] == "" AND $result['Vorname'] == ""){echo e(latin1_to_utf8($result['Kontakte']));}else{echo e(latin1_to_utf8($result['Vorname']." ".$result['Nachname']));} ?><br>
+				<?php if($result['Strasse'] != ""){echo e(latin1_to_utf8($result['Strasse']))."<br>";} ?>
 				<?php if($result['Postfach'] != ""){echo e($result['Postfach'])."<br>";} ?>
-				<?php echo e(utf8_encode($result['PLZ']." ".$result['Ort'])); ?><br>
+				<?php echo e(latin1_to_utf8($result['PLZ']." ".$result['Ort'])); ?><br>
         	</div>
 			<div class="col-sm-4">
 				<h3>Kontakt</h3>
@@ -125,7 +125,7 @@ if ($call === null) {
 				<h3>Infos</h3>
 				Mitgliedschaft: <?php echo e($result['Mitgliedschaft']); ?><br>
 				<?php if(!empty($result['Geburtsdatum'])){echo "Geburtsdatum: ".e(date("d.m.Y", strtotime($result['Geburtsdatum'])))."<br>";}; ?>
-				<?php if(!empty($result['Beruf'])){echo "Beruf: ".e(utf8_encode($result['Beruf']))."<br>";}; ?>
+				<?php if(!empty($result['Beruf'])){echo "Beruf: ".e(latin1_to_utf8($result['Beruf']))."<br>";}; ?>
                 <?php if(!empty($result['USK_EINTR'])){echo "USKA Eintritt: ".e(date("d.m.Y", strtotime($result['Eintritt'])))."<br>";}; ?>
 				<?php if(!empty($result['USK_AUSTR'])){echo "USKA Austritt: ".e(date("d.m.Y", strtotime($result['Austritt'])))."<br>";}; ?>
 				<?php if(!empty($result['Austrittsgrund'])){echo "Austrittsgrund: ".e($result['Austrittsgrund']);}; ?>
@@ -137,13 +137,13 @@ if ($call === null) {
 		<div class="row">
 			<div class="col-sm-4">
 				<h3>Via</h3>
-				<?php if(!empty($result['vName'])){echo e(utf8_encode($result['vName']))."<br>";}; ?>
-				<?php if(!empty($result['vStrasse'])){echo e(utf8_encode($result['vStrasse']))."<br>";}; ?>
-				<?php if(!empty($result['vPostfach'])){echo e(utf8_encode($result['vPostfach']))."<br>";}; ?>
-				<?php if(!empty($result['vOrt'])){echo e(utf8_encode($result['vOrt']))."<br>";}; ?>
-				<?php if(!empty($result['vLand'])){echo e(utf8_encode($result['vLand']))."<br>";}; ?>
+				<?php if(!empty($result['vName'])){echo e(latin1_to_utf8($result['vName']))."<br>";}; ?>
+				<?php if(!empty($result['vStrasse'])){echo e(latin1_to_utf8($result['vStrasse']))."<br>";}; ?>
+				<?php if(!empty($result['vPostfach'])){echo e(latin1_to_utf8($result['vPostfach']))."<br>";}; ?>
+				<?php if(!empty($result['vOrt'])){echo e(latin1_to_utf8($result['vOrt']))."<br>";}; ?>
+				<?php if(!empty($result['vLand'])){echo e(latin1_to_utf8($result['vLand']))."<br>";}; ?>
 
-				<?php if(!empty($result['vBemerk'])){echo "<br><br>".e(utf8_encode($result['vBemerk']))."<br>";}; ?>
+				<?php if(!empty($result['vBemerk'])){echo "<br><br>".e(latin1_to_utf8($result['vBemerk']))."<br>";}; ?>
 
 			</div>
 		</div>

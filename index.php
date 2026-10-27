@@ -155,16 +155,16 @@ include 'functions.php';
 
 
 				foreach($result as $value) {
-					if($value['Nachname'] == "" AND $value['Vorname'] == ""){$anschriftname = utf8_encode($value['Kontakte']);}else{$anschriftname = utf8_encode($value['Vorname']." ".$value['Nachname']);}
+					if($value['Nachname'] == "" AND $value['Vorname'] == ""){$anschriftname = latin1_to_utf8($value['Kontakte']);}else{$anschriftname = latin1_to_utf8($value['Vorname']." ".$value['Nachname']);}
 					if($value['Strasse'] == ""){$value['Strasse'] = $value['Postfach'];}
 					if($value['Strasse'] != "" AND $value['Postfach'] != ""){$value['Strasse'] = $value['Strasse']." / P.O.BOX ".filter_var($value['Postfach'], FILTER_SANITIZE_NUMBER_INT);}
 					$addrArr = array(" ", //ADA_KNR
 									 $value['callsign'],
 									 " ", //$value['ADR_ANR']
 									 $anschriftname,
-									 utf8_encode($value['Strasse']),
-									 utf8_encode(trim($value['PLZ']." ".$value['Ort'])),
-									 utf8_encode($value['addr'])
+									 latin1_to_utf8($value['Strasse']),
+									 latin1_to_utf8(trim($value['PLZ']." ".$value['Ort'])),
+									 latin1_to_utf8($value['addr'])
 									);
           if($value['via'] == "1") {
 
@@ -173,9 +173,9 @@ include 'functions.php';
             $addrArr = array(" ", //ADA_KNR
   									 $value['callsign'],
   									 " ", //$value['ADR_ANR']
-  									 utf8_encode($value['vName']),
-  									 utf8_encode($value['vStrasse']),
-  									 utf8_encode(trim($value['vOrt'])),
+  									 latin1_to_utf8($value['vName']),
+  									 latin1_to_utf8($value['vStrasse']),
+  									 latin1_to_utf8(trim($value['vOrt'])),
   									 " "
   									);
           }
@@ -223,15 +223,15 @@ include 'functions.php';
 			<?php
 
 				foreach($result2 as $value2) {
-					if($value2['Nachname'] == "" AND $value2['Vorname'] == ""){$anschriftname2 = utf8_encode($value2['Kontakte']);}else{$anschriftname2 = utf8_encode($value2['Vorname']." ".$value2['Nachname']);}
+					if($value2['Nachname'] == "" AND $value2['Vorname'] == ""){$anschriftname2 = latin1_to_utf8($value2['Kontakte']);}else{$anschriftname2 = latin1_to_utf8($value2['Vorname']." ".$value2['Nachname']);}
 					if($value2['Strasse'] == ""){$value2['Strasse'] = $value2['Postfach'];}
 					if($value2['Strasse'] != "" AND $value2['Postfach'] != ""){$value2['Strasse'] = $value2['Strasse']." / P.O.BOX ".filter_var($value2['Postfach'], FILTER_SANITIZE_NUMBER_INT);}
 					$addrArr2 = array(" ", //ADA_KNR
 									 $value2['callsign'],
 									 " ", //$value2['ADR_ANR']
 									 $anschriftname2,
-									 utf8_encode($value2['Strasse']),
-									 utf8_encode(trim($value2['PLZ']." ".$value2['Ort']))
+									 latin1_to_utf8($value2['Strasse']),
+									 latin1_to_utf8(trim($value2['PLZ']." ".$value2['Ort']))
 
 									);
 	if($value2['via'] == "1") {
@@ -241,9 +241,9 @@ include 'functions.php';
             $addrArr2 = array(" ", //ADA_KNR
   									 $value2['callsign'],
   									 " ", //$value2['ADR_ANR']
-  									 utf8_encode($value2['vName']),
-  									 utf8_encode($value2['vStrasse']),
-  									 utf8_encode(trim($value2['vOrt'])),
+  									 latin1_to_utf8($value2['vName']),
+  									 latin1_to_utf8($value2['vStrasse']),
+  									 latin1_to_utf8(trim($value2['vOrt'])),
   									 " "
   									);
           }
@@ -293,16 +293,16 @@ include 'functions.php';
 			<?php
 
 				foreach($result3 as $value3) {
-					if($value3['Nachname'] == "" AND $value3['Vorname'] == ""){$anschriftname3 = utf8_encode($value3['Kontakte']);}else{$anschriftname3 = utf8_encode($value3['Vorname']." ".$value3['Nachname']);}
+					if($value3['Nachname'] == "" AND $value3['Vorname'] == ""){$anschriftname3 = latin1_to_utf8($value3['Kontakte']);}else{$anschriftname3 = latin1_to_utf8($value3['Vorname']." ".$value3['Nachname']);}
 					if($value3['Strasse'] == ""){$value3['Strasse'] = $value3['Postfach'];}
 					if($value3['Strasse'] != "" AND $value3['Postfach'] != ""){$value['Strasse'] = $value3['Strasse']." / P.O.BOX ".filter_var($value3['Postfach'], FILTER_SANITIZE_NUMBER_INT);}
 					$addrArr3 = array(" ", //KNR
 									 $value3['callsign'],
 									 " ", //$value3['ADR_ANR']
 									 $anschriftname3,
-									 utf8_encode($value3['Strasse']),
+									 latin1_to_utf8($value3['Strasse']),
 
-									 utf8_encode(trim($value3['PLZ']." ".$value3['Ort']))
+									 latin1_to_utf8(trim($value3['PLZ']." ".$value3['Ort']))
 									);
 if($value3['via'] == "1") {
 
@@ -311,9 +311,9 @@ if($value3['via'] == "1") {
             $addrArr3 = array(" ", //ADA_KNR
   									 $value3['callsign'],
   									 " ", //$value3['ADR_ANR']
-  									 utf8_encode($value3['vName']),
-  									 utf8_encode($value3['vStrasse']),
-  									 utf8_encode(trim($value3['vOrt'])),
+  									 latin1_to_utf8($value3['vName']),
+  									 latin1_to_utf8($value3['vStrasse']),
+  									 latin1_to_utf8(trim($value3['vOrt'])),
   									 " "
   									);
           }

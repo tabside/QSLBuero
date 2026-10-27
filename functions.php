@@ -54,3 +54,16 @@ function read_counter(string $call): string
     $content = file_get_contents($real);
     return $content === false ? '0' : trim($content);
 }
+
+/**
+ * Wandelt Latin-1 (Verbindungs-Zeichensatz der DB) nach UTF-8.
+ * Ersatz für utf8_encode(), das ab PHP 8.2 veraltet ist; funktioniert auch unter PHP 7.4.
+ */
+function latin1_to_utf8($value): string
+{
+    $value = (string)$value;
+    $converted = function_exists('mb_convert_encoding')
+        ? mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1')
+        : iconv('ISO-8859-1', 'UTF-8', $value);
+    return $converted === false ? '' : $converted;
+}
