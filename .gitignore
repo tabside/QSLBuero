@@ -1,6 +1,9 @@
 # Datenbankverbindung mit Passwort – niemals ins Repo!
 dbConnect.php
 
+# Update-Konfiguration mit USKA-Token – niemals ins Repo!
+update/config.php
+
 # Datenbankdump mit Personendaten – niemals ins Repo!
 qsl_db.sql
 
