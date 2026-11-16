@@ -125,18 +125,30 @@ try {
     die('Fehler beim Leeren der Tabelle: ' . $e->getMessage());
 }
 
+// Spalte current_callsign (aktuelles Rufzeichen, bei Records mit altem Rufzeichen
+// ein anderes als callsign) gibt es erst nach update/migrations/001_current_callsign.sql.
+// Fehlt sie, läuft der Import ohne diese Angabe weiter.
+$hasCurrent = false;
+try {
+    $res = $mysqli->query("SHOW COLUMNS FROM qsl LIKE 'current_callsign'");
+    $hasCurrent = ($res && $res->num_rows > 0);
+} catch (mysqli_sql_exception $e) {
+    $hasCurrent = false;
+}
+
 $sql = "
     INSERT INTO qsl (
         Kontakte, callsign, Mitgliedschaft, Vorname, Nachname,
         Strasse, Postfach, PLZ, Ort, Land,
         Handy, Email, Eintritt, Austritt, Geschlecht, Geburtsdatum, Sprache,
         via, noqsl,
-        vName, vStrasse, vPostfach, vOrt, vLand, vBemerk
-    ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, '', ?, '', '', '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        vName, vStrasse, vPostfach, vOrt, vLand, vBemerk" . ($hasCurrent ? ", current_callsign" : "") . "
+    ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, '', ?, '', '', '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?" . ($hasCurrent ? ", ?" : "") . ")
 ";
 // Platzhalter: Kontakte, callsign, Vorname, Nachname, Strasse, Postfach,
 //              PLZ, Ort, Land, Email, Sprache, via, noqsl,
 //              vName, vStrasse, vPostfach, vOrt, vLand, vBemerk = 19
+//              (+ current_callsign = 20, wenn die Spalte vorhanden ist)
 
 try {
     $stmt = $mysqli->prepare($sql);
@@ -148,8 +160,10 @@ if (!$stmt) {
     die('Fehler beim Vorbereiten des Statements: ' . $mysqli->error);
 }
 
-$inserted = 0;
-$errors   = [];
+$inserted     = 0;
+$oldCallsigns = 0;
+$noForward    = 0;
+$errors       = [];
 
 foreach ($members as $m) {
     $vorname  = $m['first_name']  ?? '';
@@ -167,6 +181,19 @@ foreach ($members as $m) {
     $sprache  = $m['language'] ?? '';
 
     $noqsl = ($m['no_forward'] ?? false) ? 1 : 0;
+
+    // Aktuelles Rufzeichen: gleich wie callsign beim eigenen Record, beim Record
+    // mit einem alten Rufzeichen (z.B. HB3 -> HB9) das neue Rufzeichen
+    $current = strtoupper(trim((string)($m['current_callsign'] ?? '')));
+    if ($current === '') {
+        $current = $callsign;
+    }
+    if ($current !== $callsign) {
+        $oldCallsigns++;
+    }
+    if ($noqsl) {
+        $noForward++;
+    }
 
     // Hauptadresse (corr_address)
     $addr    = $m['corr_address'] ?? [];
@@ -199,14 +226,19 @@ foreach ($members as $m) {
     ]);
     $vBemerk = implode("\n", $bemerkParts);
 
-    $stmt->bind_param(
-        'sssssssssssiissssss',
+    $params = [
         $kontakte, $callsign, $vorname, $nachname,
         $strasse, $postfach, $plz, $ort, $land,
         $email, $sprache,
         $via, $noqsl,
-        $vName, $vStrasse, $vPostfach, $vOrt, $vLand, $vBemerk
-    );
+        $vName, $vStrasse, $vPostfach, $vOrt, $vLand, $vBemerk,
+    ];
+    $types = 'sssssssssssiissssss';
+    if ($hasCurrent) {
+        $params[] = $current;
+        $types   .= 's';
+    }
+    $stmt->bind_param($types, ...$params);
 
     try {
         $ok = $stmt->execute();
@@ -245,3 +277,8 @@ echo "DB Update erfolgreich!\n";
 echo "API-Stand: {$generatedAt}\n";
 echo "Mitglieder von API: {$apiCount}\n";
 echo "Importiert: {$inserted}\n";
+echo "Davon alte Rufzeichen (Verweis auf aktuelles Rufzeichen): {$oldCallsigns}\n";
+echo "Davon ohne QSL-Vermittlung (keine Adresse drucken): {$noForward}\n";
+if (!$hasCurrent) {
+    echo "Hinweis: Spalte current_callsign fehlt, aktuelles Rufzeichen wurde nicht gespeichert (update/migrations/001_current_callsign.sql ausführen).\n";
+}

@@ -67,3 +67,32 @@ function latin1_to_utf8($value): string
         : iconv('ISO-8859-1', 'UTF-8', $value);
     return $converted === false ? '' : $converted;
 }
+
+/**
+ * Aktuelles Rufzeichen eines Datensatzes, wenn es vom Rufzeichen des Datensatzes
+ * abweicht (Record mit altem Rufzeichen, z.B. HB3 -> HB9). Sonst ''.
+ */
+function qsl_current_callsign(array $row): string
+{
+    $current = strtoupper(trim((string)($row['current_callsign'] ?? '')));
+    if ($current === '' || $current === strtoupper((string)($row['callsign'] ?? ''))) {
+        return '';
+    }
+    return $current;
+}
+
+/**
+ * Zusatz für die Auswahllisten: "(keine QSL)" und Verweis auf das aktuelle Rufzeichen.
+ */
+function qsl_option_suffix(array $row): string
+{
+    $suffix = '';
+    $current = qsl_current_callsign($row);
+    if ($current !== '') {
+        $suffix .= ' → ' . $current;
+    }
+    if (!empty($row['noqsl'])) {
+        $suffix .= ' (keine QSL)';
+    }
+    return $suffix;
+}

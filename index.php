@@ -179,11 +179,13 @@ include 'functions.php';
   									 " "
   									);
           }
+					$addrArr[7] = (int)$value['noqsl']; // 1 = keine QSL-Vermittlung, nichts drucken
+					$addrArr[8] = qsl_current_callsign($value); // aktuelles Rufzeichen, '' wenn gleich
 					$addrPacket = json_attr($addrArr);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket; ?>'><?php echo e(substr($value['callsign'],3)); ?></option>
+            <option value='<?php echo $addrPacket; ?>'><?php echo e(substr($value['callsign'],3) . qsl_option_suffix($value)); ?></option>
 			<?php
 			}
 			  ?>
@@ -248,11 +250,13 @@ include 'functions.php';
   									);
           }
 
+					$addrArr2[7] = (int)$value2['noqsl']; // 1 = keine QSL-Vermittlung, nichts drucken
+					$addrArr2[8] = qsl_current_callsign($value2); // aktuelles Rufzeichen, '' wenn gleich
 					$addrPacket2 = json_attr($addrArr2);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket2; ?>'><?php echo e(substr($value2['callsign'],3)); ?></option>
+            <option value='<?php echo $addrPacket2; ?>'><?php echo e(substr($value2['callsign'],3) . qsl_option_suffix($value2)); ?></option>
 			<?php
 			}
 			  ?>
@@ -318,11 +322,13 @@ if($value3['via'] == "1") {
   									);
           }
 
+					$addrArr3[7] = (int)$value3['noqsl']; // 1 = keine QSL-Vermittlung, nichts drucken
+					$addrArr3[8] = qsl_current_callsign($value3); // aktuelles Rufzeichen, '' wenn gleich
 					$addrPacket3 = json_attr($addrArr3);
 
 
 				 ?>
-            <option value='<?php echo $addrPacket3; ?>'><?php echo e($value3['callsign']); ?></option>
+            <option value='<?php echo $addrPacket3; ?>'><?php echo e($value3['callsign'] . qsl_option_suffix($value3)); ?></option>
 			<?php
 			}
 			  ?>
@@ -423,6 +429,17 @@ if($value3['via'] == "1") {
     //   Function name   :   DoPrint
     //   Description     :   Print, Preview Module
     //------------------------------------------------------------------------------
+	// Mitglied will keine QSL-Vermittlung (API no_forward): keine Adresse drucken
+	function qslNoForward(form)
+	{
+		let addrArr;
+		try { addrArr = JSON.parse(form.jArray.value); } catch (e) { return false; }
+		if (addrArr[7] == 1) {
+			alert("Keine QSL-Vermittlung gewünscht: Für " + addrArr[1] + " wird keine Adresse gedruckt, die Karte wird nicht weitergeleitet.");
+			return true;
+		}
+		return false;
+	}
 	window.DoPrint = async function DoPrint(strExport)
     {
 		if(bpac.IsExtensionInstalled() == false)
@@ -436,6 +453,7 @@ if($value3['via'] == "1") {
 
 		try{
 			const theForm = document.getElementById("myForm");
+			if (qslNoForward(theForm)) return;
 			const strPath = DATA_FOLDER + "QSL.lbx";
 			const objDoc = bpac.IDocument;
 			const ret = await objDoc.Open(strPath);
@@ -502,6 +520,7 @@ if($value3['via'] == "1") {
 
 		try{
 			const theForm2 = document.getElementById("myForm2");
+			if (qslNoForward(theForm2)) return;
 			const strPath2 = DATA_FOLDER + "QSL.lbx";
 			const objDoc2 = bpac.IDocument;
 			const ret2 = await objDoc2.Open(strPath2);
@@ -568,6 +587,7 @@ if($value3['via'] == "1") {
 
 		try{
 			const theForm3 = document.getElementById("myForm3");
+			if (qslNoForward(theForm3)) return;
 			const strPath3 = DATA_FOLDER + "QSL.lbx";
 			const objDoc3 = bpac.IDocument;
 			const ret3 = await objDoc3.Open(strPath3);

@@ -100,6 +100,27 @@ if ($call === null) {
 			<span>(<?php echo e(read_counter($call)); ?> Etiketten gedruckt)</span>
 		</div>
 		</div>
+		<?php $currentCall = qsl_current_callsign($result); ?>
+		<?php if (!empty($result['noqsl'])) { ?>
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="alert alert-danger" style="margin-top: 15px;">
+					<strong>Keine QSL-Vermittlung gewünscht.</strong> Keine Adresse drucken, Karten nicht weiterleiten.
+				</div>
+			</div>
+		</div>
+		<?php } ?>
+		<?php if ($currentCall !== '') { ?>
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="alert alert-info" style="margin-top: 15px;">
+					<strong>Altes Rufzeichen.</strong> Aktuelles Rufzeichen:
+					<a href="http://localhost/detail.php?call=<?php echo rawurlencode($currentCall); ?>"><?php echo e($currentCall); ?></a>.
+					Die Adresse unten ist die aktuelle Adresse dieses Mitglieds.
+				</div>
+			</div>
+		</div>
+		<?php } ?>
 		<div class="row">
         	<div class="col-sm-4">
 				<h3>Adresse</h3>
